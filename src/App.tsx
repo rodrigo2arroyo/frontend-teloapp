@@ -1,23 +1,12 @@
-import React from "react";
-import { Configuration, TransshipmentApi } from '@rodrigo2arroyo/frontend-sdk';
-
-const apiConfig = new Configuration({ basePath: 'http://localhost:5125' });
-const transshipmentApi = new TransshipmentApi(apiConfig);
+import './styles/global.scss';
+import AppRoutes from "./routes/AppRoutes.tsx";
+import "primereact/resources/themes/lara-light-blue/theme.css"; // Tema de PrimeReact
+import "primereact/resources/primereact.min.css"; // Estilos base de componentes
+import "primeicons/primeicons.css"; // Íconos de PrimeReact
 
 const App = () => {
-    //const [transshipments, setTransshipments] = React.useState([]);
-
-    React.useEffect(() => {
-        transshipmentApi.transshipmentGetAllTransshipments().then((response) => {
-            console.warn(response)
-        });
-    }, []);
-
     return (
-        <div>
-            <h1>Transshipments</h1>
-
-        </div>
+        <AppRoutes></AppRoutes>
     );
 };
 
