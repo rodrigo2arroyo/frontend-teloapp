@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-// Ejemplo de SCSS adicional:
-body {
-  font-family: 'Inter', sans-serif;
+/* Elimina cualquier margen/padding global */
+@layer base {
+  html, body {
+    @apply m-0 p-0 w-full h-full overflow-x-hidden;
+    font-family: 'Inter', sans-serif;
+  }
 }
