@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@iconify/react": "^5.2.0",
+    "@react-google-maps/api": "^2.20.6",
     "@rodrigo2arroyo/frontend-sdk": "^1.0.0",
     "axios": "^1.7.8",
     "primeicons": "^7.0.0",
