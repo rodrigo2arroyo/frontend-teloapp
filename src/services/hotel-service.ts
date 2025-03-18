@@ -14,9 +14,9 @@ const hotelService = {
         }
     },
 
-    async listHotels(name?: string, district?: string): Promise<HotelsResult> {
+    async listHotels(name?: string, district?: string, userLatitude?: number, userLongitude?: number): Promise<HotelsResult> {
         try {
-            const response = await hotelApi.listHotels(name, undefined, district);
+            const response = await hotelApi.listHotels(name, undefined, district, undefined, undefined, undefined, undefined, userLatitude, userLongitude);
             return response.data;
         } catch (error: any) {
             handleApiError(error);

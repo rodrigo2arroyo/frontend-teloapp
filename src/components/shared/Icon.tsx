@@ -8,9 +8,9 @@ interface IconProps {
 
 const CustomIcon: React.FC<IconProps> = ({ icon, rotate = 0, className = "" }) => {
     return (
-        <div className={`flex items-center justify-center ${className}`}>
+        <span className={`flex items-center justify-center ${className}`}>
             <Icon icon={icon} rotate={rotate} />
-        </div>
+        </span>
     );
 };
 

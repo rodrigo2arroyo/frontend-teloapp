@@ -8,9 +8,7 @@ interface HotelCardProps {
     hotel: HotelResponse;
 }
 
-const BASE_URL = "http://localhost:5125"; // Asegúrate de que esta URL sea correcta
-
-
+const BASE_URL = "http://localhost:5125";
 
 const getFullImageUrl = (path: string) => {
     return path.startsWith("http") ? path : `${BASE_URL}${path}`;
@@ -19,9 +17,8 @@ const getFullImageUrl = (path: string) => {
 const HotelCard = ({ hotel }: HotelCardProps) => {
     const navigate = useNavigate();
     return (
-        <div className="border shadow-lg rounded-lg flex flex-col bg-white overflow-hidden">
-            {/* Imagen del hotel */}
-            <div className="p-0">
+        <div className="border shadow-lg  flex flex-col">
+            <div>
                 {hotel.images && hotel.images.length > 0 ? (
                     <Galleria
                         value={hotel.images.map(getFullImageUrl)}
@@ -47,29 +44,23 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
                 )}
             </div>
 
-            {/* Contenido del hotel */}
-            <div className="p-4 flex flex-col space-y-2">
-                {/* Nombre del hotel y precio */}
+            <div className="p-2 pt-0 flex flex-col space-y-2">
                 <div className="flex justify-between items-center">
-                    <p className="font-bold text-gray-800 text-lg">{hotel.name}</p>
-                    <span className="text-gray-700 font-semibold">Desde S/. 23/hr</span>
+                    <p className="font-bold text-gray-800 text-lg m-2">{hotel.name}</p>
+                    <span className="text-gray-700 font-semibold">S/. 23/hora</span>
                 </div>
-
-                {/* Ubicación */}
-                <p className="text-gray-600 flex items-center gap-1 text-sm">
+                <p className="text-gray-600 flex items-center gap-1 text-sm m-0">
                     <CustomIcon icon="weui:location-filled" className="text-gray-500 text-lg"/>
                     {[hotel.location?.district, hotel.location?.city].join(", ")}
                 </p>
             </div>
 
-            {/* Botón de Reserva */}
             <Button
                 label="Más detalles"
-                className="w-full"
+                className="w-full bg-gray-200 border-0 text-black"
                 onClick={() => navigate(`/hotel/${hotel.id}`)}
             />
         </div>
-
     );
 };
 

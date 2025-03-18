@@ -1,13 +1,4 @@
-import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
-import { useEffect, useRef } from "react";
-
-const containerStyle = {
-    width: "100%",
-    height: "400px",
-};
-
-// 🔹 Definir las librerías fuera del componente para evitar recargas innecesarias
-const libraries: ("marker")[] = ["marker"];
+import { useEffect, useRef, useState } from "react";
 
 type MapComponentProps = {
     lat: number;
@@ -15,45 +6,60 @@ type MapComponentProps = {
 };
 
 const MapComponent: React.FC<MapComponentProps> = ({ lat, lng }) => {
-    const apiKey = "AIzaSyA2chYWKgVTrdHe4sdLdEpNILAYDC5wUuI";
-    const center = { lat, lng };
-
-    // Cargar la API con las librerías sin recrearlas en cada render
-    const { isLoaded, loadError } = useJsApiLoader({
-        googleMapsApiKey: apiKey,
-        libraries, // 🔹 Ahora es una constante fuera del componente
-    });
-
-    const mapRef = useRef<google.maps.Map | null>(null);
-    const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+    const mapRef = useRef<HTMLDivElement | null>(null);
+    const [apiLoaded, setApiLoaded] = useState(false);
 
     useEffect(() => {
-        if (isLoaded && mapRef.current) {
-            const { AdvancedMarkerElement } = google.maps.marker;
+        const GOOGLE_MAPS_API_KEY = "AIzaSyA2chYWKgVTrdHe4sdLdEpNILAYDC5wUuI";
+        const GOOGLE_MAPS_SCRIPT_ID = "google-maps-script";
 
-            if (!markerRef.current) {
-                // 🔹 Crear el marcador y asociarlo al mapa
-                markerRef.current = new AdvancedMarkerElement({
-                    position: center,
-                    map: mapRef.current, // 🔥 Se pasa el mapa directamente en la configuración
+        const loadGoogleMaps = (): Promise<void> => {
+            return new Promise((resolve) => {
+                if (window.google && window.google.maps) {
+                    resolve();
+                    return;
+                }
+
+                if (!document.getElementById(GOOGLE_MAPS_SCRIPT_ID)) {
+                    const script = document.createElement("script");
+                    script.id = GOOGLE_MAPS_SCRIPT_ID;
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&loading=async`;
+                    script.async = true;
+                    script.defer = true;
+                    script.onload = () => {
+                        setApiLoaded(true);
+                        resolve();
+                    };
+                    document.body.appendChild(script);
+                } else {
+                    // Si el script ya está en el documento, esperamos hasta que Google Maps esté disponible
+                    const checkInterval = setInterval(() => {
+                        if (window.google && window.google.maps) {
+                            clearInterval(checkInterval);
+                            setApiLoaded(true);
+                            resolve();
+                        }
+                    }, 100);
+                }
+            });
+        };
+
+        loadGoogleMaps().then(() => {
+            if (mapRef.current) {
+                const map = new google.maps.Map(mapRef.current, {
+                    center: { lat, lng },
+                    zoom: 15,
+                });
+
+                new google.maps.Marker({
+                    position: { lat, lng },
+                    map,
                 });
             }
-        }
-    }, [isLoaded]);
+        });
+    }, [lat, lng]);
 
-    if (loadError) return <p>Error al cargar Google Maps</p>;
-    if (!isLoaded) return <p>Cargando mapa...</p>;
-
-    return (
-        <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={15}
-            onLoad={(map) => {
-                mapRef.current = map;
-            }}
-        />
-    );
+    return <div ref={mapRef} style={{ width: "100%", height: "400px" }} />;
 };
 
 export default MapComponent;

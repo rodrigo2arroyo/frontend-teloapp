@@ -16,7 +16,19 @@ const Home = () => {
                 const name = searchParams.get("name") || "";
                 const district = searchParams.get("district") || "";
 
-                const data: HotelsResult = await hotelService.listHotels(name, district);
+                // Obtener la ubicación desde sessionStorage en lugar de la URL
+                const storedLocation = sessionStorage.getItem("userLocation");
+                let userLatitude: number | undefined;
+                let userLongitude: number | undefined;
+
+                if (storedLocation) {
+                    const { lat, lng } = JSON.parse(storedLocation);
+                    userLatitude = lat;
+                    userLongitude = lng;
+                }
+
+                // Llamar a la API sin incluir la ubicación en la URL
+                const data: HotelsResult = await hotelService.listHotels(name, district, userLatitude, userLongitude);
                 setHotels(data.hotels ?? []);
             } catch (error) {
                 console.error("Error al obtener los hoteles:", error);
@@ -29,7 +41,7 @@ const Home = () => {
     }, [searchParams]);
 
     return (
-        <div className="grid grid-cols-3 gap-4 m-4">
+        <div className="grid grid-cols-5 gap-4 m-4">
             {loading ? (
                 <p className="text-center col-span-3 text-gray-600">Loading hotels...</p>
             ) : hotels.length > 0 ? (
