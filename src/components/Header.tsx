@@ -4,15 +4,21 @@ import {useEffect, useState} from "react";
 import {MultiSelect} from "primereact/multiselect";
 import { districts } from "../constants/districts.tsx";
 import {ToggleButton} from "primereact/togglebutton";
+import {useLocation, useNavigate} from "react-router-dom";
+import {useHotelContext} from "../context/HotelContext.tsx";
+import CustomIcon from "./shared/Icon.tsx";
 
 const Header = () => {
     const [searchName, setSearchName] = useState("");
     const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
     const [useCurrentLocation, setUseCurrentLocation] = useState(false);
-    const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { searchHotels } = useHotelContext();
 
     useEffect(() => {
-        // Verificamos si ya hay una ubicación almacenada en la sesión
         const storedLocation = sessionStorage.getItem("userLocation");
         if (storedLocation) {
             setUserLocation(JSON.parse(storedLocation));
@@ -20,9 +26,12 @@ const Header = () => {
         }
     }, []);
 
+    useEffect(() => {
+        handleSearch();
+    }, [userLocation]);
+
     const handleToggleLocation = () => {
         if (!useCurrentLocation) {
-            // Si el usuario activa "ON", pedimos la ubicación
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -31,22 +40,19 @@ const Header = () => {
                             lng: position.coords.longitude
                         };
                         setUserLocation(locationData);
-                        sessionStorage.setItem("userLocation", JSON.stringify(locationData)); // Guardar en sessionStorage
+                        sessionStorage.setItem("userLocation", JSON.stringify(locationData));
                         setUseCurrentLocation(true);
                     },
-                    (error) => {
-                        console.error("Error obteniendo la ubicación:", error);
+                    () => {
+                        alert("No pudimos acceder a tu ubicación.");
                         setUseCurrentLocation(false);
-                        alert("No pudimos acceder a tu ubicación. Actívala en la configuración del navegador.");
                     }
                 );
             } else {
-                console.error("Geolocalización no soportada por el navegador.");
                 alert("Tu navegador no soporta geolocalización.");
                 setUseCurrentLocation(false);
             }
         } else {
-            // Si el usuario desactiva "OFF", eliminamos la ubicación guardada
             setUserLocation(null);
             sessionStorage.removeItem("userLocation");
             setUseCurrentLocation(false);
@@ -54,13 +60,17 @@ const Header = () => {
     };
 
     const handleSearch = () => {
-        const queryParams = new URLSearchParams();
+        const filters = {
+            name: searchName,
+            district: selectedDistricts,
+            location: userLocation || undefined,
+        };
 
-        if (searchName) queryParams.append("name", searchName);
-        if (selectedDistricts.length > 0) {
-            queryParams.append("district", selectedDistricts.join(","));
+        searchHotels(filters);
+
+        if (location.pathname !== "/") {
+            navigate("/");
         }
-        console.log("Buscando con los parámetros:", queryParams.toString());
     };
 
     return (
@@ -72,8 +82,11 @@ const Header = () => {
                 >
                     TeloGO
                 </div>
-                <div className="flex items-center bg-white shadow-md p-4">
+
+                <div className="flex items-center bg-white shadow-md p-4 rounded-lg">
                     <div className="relative flex-1 max-w-[200px]">
+                        <CustomIcon icon="material-symbols:person"
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"/>
                         <InputText
                             placeholder="Nombre del Hotel"
                             className="w-full pl-10 border-gray-300 rounded-lg"
@@ -81,7 +94,12 @@ const Header = () => {
                             onChange={(e) => setSearchName(e.target.value)}
                         />
                     </div>
+
                     <div className="relative flex-1 ml-2 max-w-[400px] truncate">
+                        <CustomIcon
+                            icon="material-symbols:map"
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"
+                        />
                         <MultiSelect
                             value={selectedDistricts}
                             options={districts}
@@ -91,6 +109,7 @@ const Header = () => {
                             filter
                         />
                     </div>
+
                     <div className="ml-4">
                         <Button
                             icon="pi pi-search"
@@ -100,7 +119,6 @@ const Header = () => {
                     </div>
                 </div>
 
-                {/* 🔥 Aquí agregamos el ToggleButton para la ubicación */}
                 <div className="ml-4 flex items-center space-x-2">
                     <label className="text-white text-sm">Usar mi ubicación</label>
                     <ToggleButton

@@ -53,6 +53,13 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
                     <CustomIcon icon="weui:location-filled" className="text-gray-500 text-lg"/>
                     {[hotel.location?.district, hotel.location?.city].join(", ")}
                 </p>
+                {hotel.location?.distanceKm ?
+                    <p className="text-gray-600 flex items-center gap-1 text-sm m-0">
+                        <CustomIcon icon="tdesign:map-connection-filled" className="text-gray-500 text-lg"/>
+                        { (hotel.location?.distanceKm) } km
+                    </p> :
+                    ''
+                }
             </div>
 
             <Button

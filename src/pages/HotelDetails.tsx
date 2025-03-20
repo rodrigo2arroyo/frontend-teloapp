@@ -10,6 +10,7 @@ import {Rating} from "primereact/rating";
 import {Carousel} from "primereact/carousel";
 import MapComponent from "../components/shared/MapComponent.tsx";
 import {Card} from "primereact/card";
+import {Button} from "primereact/button";
 
 const HotelDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -57,6 +58,8 @@ const HotelDetails = () => {
 
         fetchHotel();
     }, [id]);
+
+    // const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${hotel!.location!.latitude},${hotel!.location!.longitude}`;
 
     if (!hotel) return <p className="text-center mt-10">Cargando detalles del hotel...</p>;
 
@@ -172,6 +175,12 @@ const HotelDetails = () => {
             <div>
                 <h2>Ubicacion</h2>
                 <MapComponent lat={hotel.location!.latitude!} lng={hotel.location!.longitude!}/>
+                <Button
+                    label="Cómo llegar"
+                    icon="pi pi-map"
+                    className="p-button-primary mt-4"
+                    onClick={() => window.open(googleMapsUrl, "_blank")}
+                />
             </div>
             <Divider/>
             <div>
