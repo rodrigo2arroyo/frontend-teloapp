@@ -1,22 +1,49 @@
 import {InputText} from "primereact/inputtext";
 import {Button} from "primereact/button";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {MultiSelect} from "primereact/multiselect";
 import { districts } from "../constants/districts.tsx";
-import {ToggleButton} from "primereact/togglebutton";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useHotelContext} from "../context/HotelContext.tsx";
 import CustomIcon from "./shared/Icon.tsx";
+import {InputSwitch} from "primereact/inputswitch";
+import {Menu} from "primereact/menu";
+import Modal from "./shared/Modal.tsx";
+import LoginForm from "./LoginForm.tsx";
+import RegisterForm from "./RegisterForm.tsx";
 
 const Header = () => {
     const [searchName, setSearchName] = useState("");
     const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
     const [useCurrentLocation, setUseCurrentLocation] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [isVisible, setIsVisible] = useState(false);
+    const [authView, setAuthView] = useState<"login" | "register">("login");
 
     const navigate = useNavigate();
     const location = useLocation();
     const { searchHotels } = useHotelContext();
+
+    const menuRef = useRef<Menu>(null);
+
+    const menuItems = [
+        {
+            label: "Iniciar sesión",
+            icon: "pi pi-sign-in",
+            command: () => {
+                setAuthView("login");
+                setIsVisible(true);
+            },
+        },
+        {
+            label: "Registrarse",
+            icon: "pi pi-user-plus",
+            command: () => {
+                setAuthView("register");
+                setIsVisible(true);
+            },
+        },
+    ];
 
     useEffect(() => {
         const storedLocation = sessionStorage.getItem("userLocation");
@@ -83,54 +110,75 @@ const Header = () => {
                     TeloGO
                 </div>
 
-                <div className="flex items-center bg-white shadow-md p-4 rounded-lg">
-                    <div className="relative flex-1 max-w-[200px]">
-                        <CustomIcon icon="material-symbols:person"
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"/>
+                <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-lg shadow-md">
+                    {/* Hotel Name Input */}
+                    <div className="relative">
+                        <CustomIcon
+                            icon="material-symbols:search"
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        />
                         <InputText
-                            placeholder="Nombre del Hotel"
-                            className="w-full pl-10 border-gray-300 rounded-lg"
+                            placeholder="Ingrese el Nombre"
+                            className="pl-10 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-[220px]"
                             value={searchName}
                             onChange={(e) => setSearchName(e.target.value)}
                         />
                     </div>
 
-                    <div className="relative flex-1 ml-2 max-w-[400px] truncate">
+                    {/* District Select */}
+                    <div className="relative">
                         <CustomIcon
-                            icon="material-symbols:map"
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"
+                            icon="material-symbols:location-on"
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                         />
                         <MultiSelect
                             value={selectedDistricts}
                             options={districts}
                             onChange={(e) => setSelectedDistricts(e.value)}
-                            placeholder="Elige distritos"
-                            className="w-full md:w-[400px] pl-10 border-gray-300 rounded-lg truncate"
+                            placeholder="Selecciona el Distrito"
+                            className="pl-10 rounded-md border border-gray-300 text-sm w-[320px]"
                             filter
                         />
                     </div>
 
-                    <div className="ml-4">
+                    {/* Use Location Switch */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <CustomIcon icon="ic:round-my-location" className={useCurrentLocation ? 'text-green-400' : 'text-red-600'} />
+                        <label>Usar mi ubicacion</label>
+                        <InputSwitch checked={useCurrentLocation} onChange={handleToggleLocation} />
+                    </div>
+
+                    {/* Search Button */}
+                    <div className="ml-auto">
                         <Button
-                            icon="pi pi-search"
-                            className="p-button-primary px-6 py-2"
+                            label="Buscar Telos"
+                            className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm"
                             onClick={handleSearch}
                         />
                     </div>
                 </div>
 
-                <div className="ml-4 flex items-center space-x-2">
-                    <label className="text-white text-sm">Usar mi ubicación</label>
-                    <ToggleButton
-                        checked={useCurrentLocation}
-                        onChange={handleToggleLocation}
-                        onLabel="ON"
-                        offLabel="OFF"
-                        onIcon="pi pi-map-marker"
-                        offIcon="pi pi-times"
-                        className="p-button-rounded p-button-sm"
-                    />
-                </div>
+                <Button
+                    icon="pi pi-user"
+                    className="rounded-full"
+                    onClick={(e) => menuRef.current?.toggle(e)}
+                    aria-haspopup
+                    aria-controls="profile_menu"
+                />
+
+                <Menu model={menuItems} popup ref={menuRef}></Menu>
+
+                <Modal
+                    visible={isVisible}
+                    onHide={() => setIsVisible(false)}
+                    header={authView == "login" ? "Logeate" : "Crea tu cuenta"}
+                >
+                    {authView === "login" ? (
+                        <LoginForm />
+                    ) : (
+                        <RegisterForm  />
+                    )}
+                </Modal>
             </div>
         </header>
     );
