@@ -1,12 +1,11 @@
 import {APIProvider, Map, Marker} from '@vis.gl/react-google-maps';
-import React from "react";
 
 type MapComponentProps = {
     lat: number;
     lng: number;
 };
 
-const MapComponent: React.FC<MapComponentProps> = ({ lat, lng }) => {
+const MapComponent  = ({ lat, lng } : MapComponentProps) => {
     const center = {lat: lat, lng: lng};
     const zoomLevel = 16;
 

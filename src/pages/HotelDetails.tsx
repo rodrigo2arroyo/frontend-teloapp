@@ -59,7 +59,7 @@ const HotelDetails = () => {
         fetchHotel();
     }, [id]);
 
-    // const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${hotel!.location!.latitude},${hotel!.location!.longitude}`;
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${hotel?.location?.latitude},${hotel?.location?.longitude}`;
 
     if (!hotel) return <p className="text-center mt-10">Cargando detalles del hotel...</p>;
 

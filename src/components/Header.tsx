@@ -53,10 +53,6 @@ const Header = () => {
         }
     }, []);
 
-    useEffect(() => {
-        handleSearch();
-    }, [userLocation]);
-
     const handleToggleLocation = () => {
         if (!useCurrentLocation) {
             if ("geolocation" in navigator) {
